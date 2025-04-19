@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Daily Phase Tracker{% endblock %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="phase-tracker-widget">
+    {% if is_weekend %}
+    <div class="weekend-message">
+        <h3>It's the weekend!</h3>
+        <p>Your daily phases are not active today. You can enable weekend tracking in your settings.</p>
+    </div>
+    {% elif not current_phase %}
+    <div class="no-active-phase">
+        <h3>No active phase</h3>
+        {% if next_phase %}
+        <p>Next phase: <span class="next-phase-name">{{ next_phase.name }}</span> starts at {{ next_phase.start_time }}</p>
+        {% else %}
+        <p>No phases scheduled. <a href="{{ url_for('phases.manage_phases') }}">Add some phases</a> to get started.</p>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="current-phase" style="border-color: {{ current_phase.color }};">
+        <h2 class="phase-name">{{ current_phase.name }}</h2>
+        <div class="time-info">
+            <div class="time-range">{{ current_phase.start_time }} - {{ current_phase.end_time }}</div>
+            <div class="current-time">Current time: <span id="live-time">{{ current_time }}</span></div>
+        </div>
+        <div class="progress-container">
+            <div class="progress" style="height: 20px;">
+                <div id="phase-progress" class="progress-bar" style="width: 0%; background-color: {{ current_phase.color }};">
+                    <span id="progress-text">0%</span>
+                </div>
+            </div>
+        </div>
+        <div class="next-phase-info">
+            {% if next_phase %}
+            <p>Next: <span class="next-phase-name">{{ next_phase.name }}</span> at {{ next_phase.start_time }}</p>
+            {% else %}
+            <p>This is your last phase for today</p>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Convert time string (HH:MM) to minutes since midnight
+    function timeToMinutes(timeStr) {
+        const [hours, minutes] = timeStr.split(':').map(Number);
+        return hours * 60 + minutes;
+    }
+
+    // Format minutes to HH:MM
+    function minutesToTime(minutes) {
+        const hours = Math.floor(minutes / 60);
+        const mins = minutes % 60;
+        return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+    }
+
+    // Update progress bar for current phase
+    function updatePhaseProgress() {
+        {% if current_phase %}
+            const startTime = "{{ current_phase.start_time }}";
+            const endTime = "{{ current_phase.end_time }}";
+            
+            const startMinutes = timeToMinutes(startTime);
+            const endMinutes = timeToMinutes(endTime);
+            const totalDuration = endMinutes - startMinutes;
+
+            const now = new Date();
+            const currentMinutes = now.getHours() * 60 + now.getMinutes();
+            const elapsedMinutes = currentMinutes - startMinutes;
+            
+            let progressPercent = Math.round((elapsedMinutes / totalDuration) * 100);
+            progressPercent = Math.max(0, Math.min(100, progressPercent)); // Clamp between 0-100%
+            
+            document.getElementById('phase-progress').style.width = progressPercent + '%';
+            document.getElementById('progress-text').textContent = progressPercent + '%';
+            
+            // Update current time display
+            document.getElementById('live-time').textContent = minutesToTime(currentMinutes);
+            
+            // Auto-refresh the page when phase changes
+            if (progressPercent >= 100) {
+                setTimeout(() => { location.reload(); }, 1000);
+            }
+        {% endif %}
+    }
+
+    // Update progress immediately and then every minute
+    updatePhaseProgress();
+    setInterval(updatePhaseProgress, 60000);
+
+    // Function to resize window to compact mode
+    function switchToCompactMode() {
+        // Set minimal size for the widget
+        window.resizeTo(400, 250);
+    }
+
+    // Add compact mode button
+    document.addEventListener('DOMContentLoaded', function() {
+        const navbar = document.querySelector('.navbar');
+        const compactBtn = document.createElement('button');
+        compactBtn.innerText = 'Compact Mode';
+        compactBtn.className = 'btn btn-sm btn-outline-light ms-2';
+        compactBtn.onclick = switchToCompactMode;
+        
+        if (navbar) {
+            navbar.querySelector('.container').appendChild(compactBtn);
+        }
+    });
+</script>
+{% endblock %}

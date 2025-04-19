@@ -1,0 +1,112 @@
+/* Dashboard specific styling */
+.phase-tracker-widget {
+    max-width: 600px;
+    margin: 0 auto;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    padding: 20px;
+    min-height: 200px;
+}
+
+.current-phase {
+    border-left: 8px solid #3498db;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+}
+
+.phase-name {
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #2c3e50;
+}
+
+.time-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    color: #7f8c8d;
+    font-size: 0.9rem;
+}
+
+.progress-container {
+    margin: 15px 0;
+}
+
+.progress {
+    height: 25px !important;
+    border-radius: 15px;
+    background-color: #ecf0f1;
+    overflow: hidden;
+}
+
+.progress-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: width 1s;
+    color: white;
+    font-weight: bold;
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3);
+}
+
+.next-phase-info {
+    margin-top: 15px;
+    font-size: 0.9rem;
+    color: #7f8c8d;
+}
+
+.next-phase-name {
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.weekend-message, .no-active-phase {
+    text-align: center;
+    padding: 20px;
+    color: #7f8c8d;
+}
+
+.weekend-message h3, .no-active-phase h3 {
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+/* Compact mode styling */
+.compact-mode {
+    padding: 10px !important;
+    min-height: auto !important;
+}
+
+.compact-mode .phase-name {
+    font-size: 1.3rem;
+    margin-bottom: 5px;
+}
+
+.compact-mode .time-info {
+    margin-bottom: 8px;
+    font-size: 0.8rem;
+}
+
+.compact-mode .progress-container {
+    margin: 8px 0;
+}
+
+.compact-mode .next-phase-info {
+    margin-top: 8px;
+    font-size: 0.8rem;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 576px) {
+    .phase-tracker-widget {
+        border-radius: 0;
+        box-shadow: none;
+    }
+    
+    .phase-name {
+        font-size: 1.5rem;
+    }
+}

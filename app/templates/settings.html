@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - Daily Phase Tracker{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0">User Settings</h3>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('settings.user_settings') }}">
+                    <div class="mb-3">
+                        <label for="timezone" class="form-label">Your Timezone</label>
+                        <select class="form-select" id="timezone" name="timezone">
+                            {% for tz in timezones %}
+                                <option value="{{ tz }}" {% if tz == current_user.timezone %}selected{% endif %}>{{ tz }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">This will ensure your phases display correctly based on your local time.</div>
+                    </div>
+                    
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="weekend_toggle" name="weekend_toggle" {% if current_user.apply_to_weekends %}checked{% endif %}>
+                        <label class="form-check-label" for="weekend_toggle">Apply daily phases to weekends</label>
+                        <div class="form-text">When enabled, your daily phases will also be active on Saturday and Sunday.</div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Save Settings</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
