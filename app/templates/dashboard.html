@@ -107,7 +107,7 @@
     
     // Notification handling variables
     let notificationPermission = false;
-    let notificationsEnabled = {% if current_user.enable_notifications %}true{% else %}false{% endif %};
+    let notificationsEnabled = {% if current_user.enable_notifications %} true {% else %} false {% endif %};
     let notificationAdvance = {{ current_user.notification_advance|default(5) }};
     let phases = [];
 
