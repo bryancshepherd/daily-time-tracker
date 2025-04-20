@@ -103,8 +103,147 @@
         window.resizeTo(400, 250);
     }
 
-    // Add compact mode button
+    // =============== NOTIFICATION CODE BEGINS HERE ===============
+    
+    // Notification handling variables
+    let notificationPermission = false;
+    let notificationsEnabled = {% if current_user.enable_notifications %}true{% else %}false{% endif %};
+    let notificationAdvance = {{ current_user.notification_advance|default(5) }};
+    let phases = [];
+
+    // Function to request notification permissions
+    function requestNotificationPermission() {
+        if (!("Notification" in window)) {
+            console.log("This browser does not support notifications");
+            return;
+        }
+        
+        if (Notification.permission === "granted") {
+            notificationPermission = true;
+        } else if (Notification.permission !== "denied") {
+            Notification.requestPermission().then(permission => {
+                notificationPermission = permission === "granted";
+                if (notificationPermission) {
+                    // Send a test notification
+                    new Notification("Phase Tracker Notifications Enabled", {
+                        body: "You will now receive notifications when phases change.",
+                        icon: "/static/favicon.ico"
+                    });
+                }
+            });
+        }
+    }
+
+    // Function to send a notification
+    function sendNotification(title, message) {
+        if (notificationPermission && notificationsEnabled) {
+            const notification = new Notification(title, {
+                body: message,
+                icon: "/static/favicon.ico"
+            });
+            
+            // Auto close after 10 seconds
+            setTimeout(() => {
+                notification.close();
+            }, 10000);
+        }
+    }
+
+    // Get phases from the server
+    function fetchPhases() {
+        fetch('/api/phases')
+            .then(response => response.json())
+            .then(data => {
+                phases = data;
+                checkForUpcomingPhases();
+            });
+    }
+
+    // Check for upcoming phase changes
+    function checkForUpcomingPhases() {
+        if (!notificationPermission || !notificationsEnabled || phases.length === 0) {
+            return;
+        }
+        
+        const now = new Date();
+        const currentMinutes = now.getHours() * 60 + now.getMinutes();
+        
+        // Check for weekend
+        const isWeekend = ['Saturday', 'Sunday'].includes(new Date().toLocaleDateString('en-US', {weekday: 'long'}));
+        const skipWeekend = isWeekend && !{{ 'true' if current_user.apply_to_weekends else 'false' }};
+        
+        if (skipWeekend) {
+            return;
+        }
+        
+        // Find the next phase change
+        let nextPhaseStart = null;
+        let nextPhase = null;
+        
+        // First check for phases starting later today
+        for (const phase of phases) {
+            const phaseStartMinutes = timeToMinutes(phase.start_time);
+            const minutesUntilStart = phaseStartMinutes - currentMinutes;
+            
+            if (minutesUntilStart > 0 && minutesUntilStart <= notificationAdvance) {
+                // This phase starts soon
+                if (nextPhaseStart === null || phaseStartMinutes < nextPhaseStart) {
+                    nextPhaseStart = phaseStartMinutes;
+                    nextPhase = phase;
+                }
+            }
+        }
+        
+        // If no upcoming phase found, find the next phase regardless of time
+        if (nextPhase === null) {
+            for (const phase of phases) {
+                const phaseStartMinutes = timeToMinutes(phase.start_time);
+                
+                if (phaseStartMinutes > currentMinutes) {
+                    if (nextPhaseStart === null || phaseStartMinutes < nextPhaseStart) {
+                        nextPhaseStart = phaseStartMinutes;
+                        nextPhase = phase;
+                    }
+                }
+            }
+        }
+        
+        // If we've found a phase that needs notification
+        if (nextPhase && nextPhaseStart - currentMinutes <= notificationAdvance) {
+            const minutesUntilStart = nextPhaseStart - currentMinutes;
+            
+            // Set a timeout to send the notification
+            if (minutesUntilStart > 0) {
+                setTimeout(() => {
+                    sendNotification(
+                        `Phase Starting: ${nextPhase.name}`,
+                        `Your "${nextPhase.name}" phase is starting now.`
+                    );
+                }, minutesUntilStart * 60 * 1000);
+            }
+        }
+        
+        // Additionally check for current phase ending soon
+        {% if current_phase %}
+        const phaseEndMinutes = timeToMinutes("{{ current_phase.end_time }}");
+        const minutesUntilEnd = phaseEndMinutes - currentMinutes;
+        
+        if (minutesUntilEnd > 0 && minutesUntilEnd <= notificationAdvance) {
+            setTimeout(() => {
+                sendNotification(
+                    `Phase Ending: {{ current_phase.name }}`,
+                    `Your "{{ current_phase.name }}" phase is ending soon.`
+                );
+            }, minutesUntilEnd * 60 * 1000);
+        }
+        {% endif %}
+    }
+
+    // =============== NOTIFICATION CODE ENDS HERE ===============
+
+    // Add DOM ready event handlers
     document.addEventListener('DOMContentLoaded', function() {
+        // Add compact mode button
         const navbar = document.querySelector('.navbar');
         const compactBtn = document.createElement('button');
         compactBtn.innerText = 'Compact Mode';
@@ -113,6 +252,30 @@
         
         if (navbar) {
             navbar.querySelector('.container').appendChild(compactBtn);
+        }
+        
+        // Add notification permission button if notifications are enabled
+        if (notificationsEnabled) {
+            const notifyBtn = document.createElement('button');
+            notifyBtn.innerText = 'Enable Notifications';
+            notifyBtn.className = 'btn btn-sm btn-outline-light ms-2';
+            notifyBtn.onclick = requestNotificationPermission;
+            
+            if (navbar) {
+                navbar.querySelector('.container').appendChild(notifyBtn);
+                
+                // Hide the button if permission already granted
+                if (Notification.permission === "granted") {
+                    notificationPermission = true;
+                    notifyBtn.style.display = 'none';
+                }
+            }
+            
+            // Initialize notifications
+            fetchPhases();
+            
+            // Set up regular checks for upcoming phases
+            setInterval(checkForUpcomingPhases, 60000);
         }
     });
 </script>

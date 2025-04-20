@@ -5,7 +5,7 @@
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-8">
-        <div class="card">
+        <div class="card mb-4">
             <div class="card-header bg-primary text-white">
                 <h3 class="mb-0">User Settings</h3>
             </div>
@@ -25,6 +25,21 @@
                         <input type="checkbox" class="form-check-input" id="weekend_toggle" name="weekend_toggle" {% if current_user.apply_to_weekends %}checked{% endif %}>
                         <label class="form-check-label" for="weekend_toggle">Apply daily phases to weekends</label>
                         <div class="form-text">When enabled, your daily phases will also be active on Saturday and Sunday.</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h4>Notification Settings</h4>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="enable_notifications" name="enable_notifications" {% if current_user.enable_notifications %}checked{% endif %}>
+                            <label class="form-check-label" for="enable_notifications">Enable browser notifications</label>
+                            <div class="form-text">Receive notifications when a phase starts or ends.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="notification_advance" class="form-label">Notification Advance (minutes)</label>
+                            <input type="number" class="form-control" id="notification_advance" name="notification_advance" min="0" max="30" value="{{ current_user.notification_advance }}">
+                            <div class="form-text">How many minutes in advance to receive notifications before a phase starts.</div>
+                        </div>
                     </div>
                     
                     <button type="submit" class="btn btn-primary">Save Settings</button>

@@ -14,6 +14,8 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(255), nullable=False)
     timezone = db.Column(db.String(50), default='UTC')
     apply_to_weekends = db.Column(db.Boolean, default=False)
+    enable_notifications = db.Column(db.Boolean, default=True)
+    notification_advance = db.Column(db.Integer, default=5)  
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     phases = db.relationship('Phase', backref='user', lazy=True, cascade='all, delete-orphan')
 
