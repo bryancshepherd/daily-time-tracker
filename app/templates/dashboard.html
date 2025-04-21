@@ -97,17 +97,11 @@
     updatePhaseProgress();
     setInterval(updatePhaseProgress, 60000);
 
-    // Function to resize window to compact mode
-    function switchToCompactMode() {
-        // Set minimal size for the widget
-        window.resizeTo(400, 250);
-    }
-
     // =============== NOTIFICATION CODE BEGINS HERE ===============
     
     // Notification handling variables
     let notificationPermission = false;
-    let notificationsEnabled = {% if current_user.enable_notifications %} true {% else %} false {% endif %};
+    let notificationsEnabled = {% if current_user.enable_notifications %}true{% else %}false{% endif %};
     let notificationAdvance = {{ current_user.notification_advance|default(5) }};
     let phases = [];
 
@@ -120,6 +114,7 @@
         
         if (Notification.permission === "granted") {
             notificationPermission = true;
+            document.getElementById('notification-btn').style.display = 'none';
         } else if (Notification.permission !== "denied") {
             Notification.requestPermission().then(permission => {
                 notificationPermission = permission === "granted";
@@ -129,6 +124,7 @@
                         body: "You will now receive notifications when phases change.",
                         icon: "/static/favicon.ico"
                     });
+                    document.getElementById('notification-btn').style.display = 'none';
                 }
             });
         }
@@ -243,32 +239,21 @@
 
     // Add DOM ready event handlers
     document.addEventListener('DOMContentLoaded', function() {
-        // Add compact mode button
-        const navbar = document.querySelector('.navbar');
-        const compactBtn = document.createElement('button');
-        compactBtn.innerText = 'Compact Mode';
-        compactBtn.className = 'btn btn-sm btn-outline-light ms-2';
-        compactBtn.onclick = switchToCompactMode;
-        
-        if (navbar) {
-            navbar.querySelector('.container').appendChild(compactBtn);
-        }
-        
         // Add notification permission button if notifications are enabled
-        if (notificationsEnabled) {
+        const navbar = document.querySelector('.navbar');
+        
+        if (navbar && notificationsEnabled) {
             const notifyBtn = document.createElement('button');
             notifyBtn.innerText = 'Enable Notifications';
             notifyBtn.className = 'btn btn-sm btn-outline-light ms-2';
+            notifyBtn.id = 'notification-btn';
             notifyBtn.onclick = requestNotificationPermission;
+            navbar.querySelector('.container').appendChild(notifyBtn);
             
-            if (navbar) {
-                navbar.querySelector('.container').appendChild(notifyBtn);
-                
-                // Hide the button if permission already granted
-                if (Notification.permission === "granted") {
-                    notificationPermission = true;
-                    notifyBtn.style.display = 'none';
-                }
+            // Hide the button if permission already granted
+            if (Notification.permission === "granted") {
+                notificationPermission = true;
+                notifyBtn.style.display = 'none';
             }
             
             // Initialize notifications
