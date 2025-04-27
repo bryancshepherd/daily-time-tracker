@@ -2,6 +2,10 @@
 
 {% block title %}Manage Phases - Daily Phase Tracker{% endblock %}
 
+{% block additional_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/phases.css') }}">
+{% endblock %}
+
 {% block content %}
 <div class="row">
     <div class="col-md-6">
@@ -255,138 +259,4 @@
             });
     }
 </script>
-
-<style>
-    /* Phase color preview */
-    .color-preview {
-        width: 25px;
-        height: 25px;
-        border-radius: 50%;
-        display: inline-block;
-    }
-    
-    /* Make card body taller to fit entire day without scrolling */
-    .schedule-card-body {
-        padding: 0;
-    }
-    
-    /* Vertical schedule styles */
-    .schedule-visual {
-        position: relative;
-        width: 100%;
-        height: 1200px; /* Keep this as is */
-        margin: 0;
-        padding: 30px 0; /* Add padding top and bottom */
-    }   
-    
-    .timeline-container-vertical {
-        position: absolute;
-        left: 0;
-        top: 30px; /* Match top padding */
-        width: 60px;
-        height: calc(100% - 60px); /* Adjust height to account for padding */
-        border-right: 2px solid #ddd;
-        background-color: #f8f9fa;
-    }
-    
-    .hour-mark-vertical {
-        position: absolute;
-        width: 100%;
-        height: 20px;
-        left: 0;
-    }
-    
-    .hour-label-vertical {
-        position: absolute;
-        font-size: 10px;
-        right: 10px;
-        top: -5px;
-        color: #666;
-    }
-    
-    .hour-line-vertical {
-        position: absolute;
-        height: 1px;
-        width: 10px;
-        background-color: #aaa;
-        top: 7px;
-        right: 0;
-    }
-    
-    .phases-container-vertical {
-        position: absolute;
-        left: 70px;
-        right: 10px;
-        top: 30px; /* Match top padding */
-        height: calc(100% - 60px); /* Adjust height to account for padding */
-    }
-    
-    .phase-block-vertical {
-        position: absolute;
-        left: 0;
-        width: 90%;
-        border-radius: 4px;
-        opacity: 0.8;
-        overflow: hidden;
-        min-height: 2px; /* Ensure even tiny phases are visible */
-        transition: all 0.2s ease;
-        cursor: pointer;
-    }
-    
-    /* Hover effect for phases */
-    .phase-block-vertical:hover {
-        opacity: 1;
-        box-shadow: 0 0 8px rgba(0,0,0,0.3);
-        z-index: 10;
-    }
-    
-    /* Special hover for very short phases */
-    .short-phase:hover {
-        height: auto !important;
-        min-height: 20px;
-        z-index: 100;
-    }
-    
-    .short-phase:hover::after {
-        content: attr(title);
-        position: absolute;
-        left: 5px;
-        top: 2px;
-        color: white;
-        font-size: 10px;
-        text-shadow: 0 0 3px rgba(0,0,0,0.7);
-        white-space: nowrap;
-    }
-    
-    .phase-label-vertical {
-        padding: 2px 5px;
-        font-size: 11px;
-        color: white;
-        text-shadow: 0 0 3px rgba(0,0,0,0.5);
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-    
-    /* Generate hour marks dynamically */
-    {% for hour in range(25) %}
-    .hour-mark-vertical:nth-child({{ hour + 1 }}) {
-        top: calc({{ hour }} / 24 * 100%);
-    }
-    {% endfor %}
-    
-    /* Add slight background alternation for readability */
-    {% for hour in range(0, 24, 2) %}
-    .hour-mark-vertical:nth-child({{ hour + 1 }})::after {
-        content: '';
-        position: absolute;
-        left: 0;
-        right: -2px;
-        top: 0;
-        height: calc(100% / 24 * 200%);
-        background-color: rgba(0,0,0,0.02);
-        z-index: -1;
-    }
-    {% endfor %}
-</style>
 {% endblock %}

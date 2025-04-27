@@ -2,6 +2,9 @@
 
 {% block title %}Settings - Daily Phase Tracker{% endblock %}
 
+{% block additional_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/settings.css') }}">
+{% endblock %}
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-8">
