@@ -112,24 +112,28 @@
             return;
         }
         
-        // Check if permission is already granted
+        // Special handling for Chrome
+        const isChrome = /Chrome/.test(navigator.userAgent) && !/Edge|Edg/.test(navigator.userAgent);
+        
         if (Notification.permission === "granted") {
             notificationPermission = true;
-            // Send a test notification to confirm it works
+            // Test notification
             sendNotification("Notifications Enabled", "You will now receive phase notifications.");
         } else if (Notification.permission !== "denied") {
             // Request permission
             Notification.requestPermission().then(permission => {
                 notificationPermission = permission === "granted";
                 if (notificationPermission) {
-                    // Send a test notification
-                    sendNotification("Notifications Enabled", "You will now receive phase notifications.");
-                } else {
-                    console.log("Notification permission denied");
+                    // Chrome sometimes needs a delay after granting permission
+                    if (isChrome) {
+                        setTimeout(() => {
+                            sendNotification("Notifications Enabled", "You will now receive phase notifications.");
+                        }, 1000);
+                    } else {
+                        sendNotification("Notifications Enabled", "You will now receive phase notifications.");
+                    }
                 }
             });
-        } else {
-            console.log("Notification permission was previously denied");
         }
     }
 
@@ -172,6 +176,7 @@
     }
 
     // Check for upcoming phase changes
+    // Check for upcoming phase changes
     function checkForUpcomingPhases() {
         if (!notificationPermission || !notificationsEnabled || phases.length === 0) {
             return;
@@ -188,11 +193,35 @@
             return;
         }
         
+        // Find the current phase based on time
+        let currentPhase = null;
+        {% if current_phase %}
+        currentPhase = {
+            name: "{{ current_phase.name }}",
+            end_time: "{{ current_phase.end_time }}"
+        };
+        
+        // Check for current phase ending soon
+        const phaseEndMinutes = timeToMinutes(currentPhase.end_time);
+        const minutesUntilEnd = phaseEndMinutes - currentMinutes;
+        
+        if (minutesUntilEnd > 0 && minutesUntilEnd <= notificationAdvance) {
+            console.log(`Setting notification for end of ${currentPhase.name} in ${minutesUntilEnd} minutes`);
+            setTimeout(() => {
+                console.log(`Time to send end notification for ${currentPhase.name}`);
+                sendNotification(
+                    `Phase Ending: ${currentPhase.name}`,
+                    `Your "${currentPhase.name}" phase is ending in ${minutesUntilEnd} minutes.`
+                );
+            }, (minutesUntilEnd - 5) * 60 * 1000); // Fire 5 minutes before end
+        }
+        {% endif %}
+        
         // Find the next phase change
         let nextPhaseStart = null;
         let nextPhase = null;
         
-        // First check for phases starting later today
+        // Find phases starting later today
         for (const phase of phases) {
             const phaseStartMinutes = timeToMinutes(phase.start_time);
             const minutesUntilStart = phaseStartMinutes - currentMinutes;
@@ -236,23 +265,6 @@
                 }, minutesUntilStart * 60 * 1000);
             }
         }
-        
-        // Additionally check for current phase ending soon
-        {% if current_phase %}
-        const phaseEndMinutes = timeToMinutes("{{ current_phase.end_time }}");
-        const minutesUntilEnd = phaseEndMinutes - currentMinutes;
-        
-        if (minutesUntilEnd > 0 && minutesUntilEnd <= notificationAdvance) {
-            console.log(`Setting notification for end of ${nextPhase.name} in ${minutesUntilEnd} minutes`);
-            setTimeout(() => {
-                console.log(`Time to send end notification for ${nextPhase.name}`);
-                sendNotification(
-                    `Phase Ending: {{ current_phase.name }}`,
-                    `Your "{{ current_phase.name }}" phase is ending soon.`
-                );
-            }, minutesUntilEnd * 60 * 1000);
-        }
-        {% endif %}
     }
 
     // =============== NOTIFICATION CODE ENDS HERE ===============

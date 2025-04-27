@@ -1,0 +1,15 @@
+{
+    "name": "Daily Phase Tracker",
+    "short_name": "Phases",
+    "icons": [
+      {
+        "src": "/static/favicon.ico",
+        "sizes": "32x32",
+        "type": "image/x-icon"
+      }
+    ],
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#2c3e50"
+  }

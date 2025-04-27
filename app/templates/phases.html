@@ -200,6 +200,23 @@
                     const hourMark = document.createElement('div');
                     hourMark.className = 'hour-mark-vertical';
                     
+                    // Position each hour mark dynamically
+                    hourMark.style.top = `${(hour / 24) * 100}%`;
+                    
+                    // Add alternating background for even hours
+                    if (hour % 2 === 0) {
+                        const bgElement = document.createElement('div');
+                        bgElement.className = 'hour-background';
+                        bgElement.style.position = 'absolute';
+                        bgElement.style.left = '0';
+                        bgElement.style.right = '-2px';
+                        bgElement.style.top = '0';
+                        bgElement.style.height = `${(1 / 24) * 200}%`;
+                        bgElement.style.backgroundColor = 'rgba(0,0,0,0.02)';
+                        bgElement.style.zIndex = '-1';
+                        hourMark.appendChild(bgElement);
+                    }
+                    
                     const hourLabel = document.createElement('span');
                     hourLabel.className = 'hour-label-vertical';
                     hourLabel.textContent = hour.toString().padStart(2, '0') + ':00';
