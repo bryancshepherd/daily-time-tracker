@@ -112,36 +112,52 @@
             return;
         }
         
+        // Check if permission is already granted
         if (Notification.permission === "granted") {
             notificationPermission = true;
-            document.getElementById('notification-btn').style.display = 'none';
+            // Send a test notification to confirm it works
+            sendNotification("Notifications Enabled", "You will now receive phase notifications.");
         } else if (Notification.permission !== "denied") {
+            // Request permission
             Notification.requestPermission().then(permission => {
                 notificationPermission = permission === "granted";
                 if (notificationPermission) {
                     // Send a test notification
-                    new Notification("Phase Tracker Notifications Enabled", {
-                        body: "You will now receive notifications when phases change.",
-                        icon: "/static/favicon.ico"
-                    });
-                    document.getElementById('notification-btn').style.display = 'none';
+                    sendNotification("Notifications Enabled", "You will now receive phase notifications.");
+                } else {
+                    console.log("Notification permission denied");
                 }
             });
+        } else {
+            console.log("Notification permission was previously denied");
         }
     }
 
     // Function to send a notification
     function sendNotification(title, message) {
+        console.log("Attempting to send notification:", title, message);
+        console.log("Permission status:", Notification.permission);
+        console.log("notificationPermission variable:", notificationPermission);
+        console.log("notificationsEnabled variable:", notificationsEnabled);
+        
         if (notificationPermission && notificationsEnabled) {
-            const notification = new Notification(title, {
-                body: message,
-                icon: "/static/favicon.ico"
-            });
-            
-            // Auto close after 10 seconds
-            setTimeout(() => {
-                notification.close();
-            }, 10000);
+            try {
+                const notification = new Notification(title, {
+                    body: message,
+                    icon: "/static/favicon.ico"
+                });
+                
+                // Auto close after 10 seconds
+                setTimeout(() => {
+                    notification.close();
+                }, 10000);
+                
+                console.log("Notification sent successfully");
+            } catch (error) {
+                console.error("Error sending notification:", error);
+            }
+        } else {
+            console.log("Cannot send notification - permissions not granted or notifications disabled");
         }
     }
 
@@ -210,7 +226,9 @@
             
             // Set a timeout to send the notification
             if (minutesUntilStart > 0) {
+                console.log(`Setting notification for ${nextPhase.name} in ${minutesUntilStart} minutes`);
                 setTimeout(() => {
+                    console.log(`Time to send notification for ${nextPhase.name}`);
                     sendNotification(
                         `Phase Starting: ${nextPhase.name}`,
                         `Your "${nextPhase.name}" phase is starting now.`
@@ -225,7 +243,9 @@
         const minutesUntilEnd = phaseEndMinutes - currentMinutes;
         
         if (minutesUntilEnd > 0 && minutesUntilEnd <= notificationAdvance) {
+            console.log(`Setting notification for end of ${nextPhase.name} in ${minutesUntilEnd} minutes`);
             setTimeout(() => {
+                console.log(`Time to send end notification for ${nextPhase.name}`);
                 sendNotification(
                     `Phase Ending: {{ current_phase.name }}`,
                     `Your "{{ current_phase.name }}" phase is ending soon.`

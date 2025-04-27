@@ -7,8 +7,8 @@ def create_test_data():
         # Standard office worker
         {
             "username": "the_boss",
-            "email": "boss@example.com",
-            "password": os.environ.get("TEST_PASSWORD_1"),
+            "email": "the_boss@example.com",
+            "password": os.environ.get("TEST_PASSWORD_0"),
             "timezone": "America/New_York",
             "apply_to_weekends": False,
             "phases": [
@@ -123,7 +123,7 @@ def create_test_data():
         {
             "username": "every_10_mins",
             "email": "every_10_mins@example.com",
-            "password": os.environ.get("TEST_PASSWORD_5"),
+            "password": os.environ.get("TEST_PASSWORD_6"),
             "timezone": "America/New_York",
             "apply_to_weekends": True,
             "phases": [
